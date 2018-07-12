@@ -1,6 +1,0 @@
-model_checkpoint_path: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_37.ckpt"
-all_model_checkpoint_paths: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_33.ckpt"
-all_model_checkpoint_paths: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_34.ckpt"
-all_model_checkpoint_paths: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_35.ckpt"
-all_model_checkpoint_paths: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_36.ckpt"
-all_model_checkpoint_paths: "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_37.ckpt"

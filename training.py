@@ -40,8 +40,11 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
     eval_episode_rewards_history = deque(maxlen=100)
     episode_rewards_history = deque(maxlen=100)
     with U.single_threaded_session() as sess:
+        
+        #saver.restore(sess, "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_33.ckpt")
         # Prepare everything.
         agent.initialize(sess)
+        #agent.continue_sess(sess)
         sess.graph.finalize()
 
         agent.reset()
@@ -84,8 +87,6 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
                     assert max_action.shape == action.shape
                     new_obs, r, done, info = env.step(max_action * action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
                     t += 1
-                    if epoch > 20:
-                        time.sleep(0.05)
                     #if rank == 0 and render:
                     #    env.render()
                     episode_reward += r
@@ -188,7 +189,7 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
             combined_stats['total/steps'] = t
             
             
-            save_path = saver.save(sess, "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_"+str(epoch)+".ckpt")
+            save_path = saver.save(sess, "./model/epoch_"+str(epoch)+".ckpt")
             print(save_path)
             
             

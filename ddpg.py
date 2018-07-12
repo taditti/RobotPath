@@ -327,6 +327,13 @@ class DDPG(object):
         self.actor_optimizer.sync()
         self.critic_optimizer.sync()
         self.sess.run(self.target_init_updates)
+    
+    def continue_sess(self, sess):
+        self.sess = sess
+        #self.sess.run(tf.global_variables_initializer())
+        self.actor_optimizer.sync()
+        self.critic_optimizer.sync()
+        self.sess.run(self.target_init_updates)
 
     def update_target_net(self):
         self.sess.run(self.target_soft_updates)
