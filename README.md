@@ -1,8 +1,11 @@
 # RobotPath
 
+## Using OpenAI DDPG for online obstacle avoidance.
+
 ![Alt Text](https://github.com/kavehkamali/RobotPath/blob/master/demo.gif)
 
-Using OpenAI DDPG for online obstacle avoidance.
+
+## Installation:
 
 1- Install pybullet:
 
@@ -27,7 +30,9 @@ Note 2: Atary module of gym cannot be installed on windows. So remove the word: 
 
 3- Install MPI on your system and put its path in the PATH environmental variable.
 
-4- Run RobotPath training:
+# Training:
+
+Run RobotPath training:
 
 ```
 python main.py
