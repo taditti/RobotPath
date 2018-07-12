@@ -30,7 +30,7 @@ Note 2: Atary module of gym cannot be installed on windows. So remove the word: 
 
 3- Install MPI on your system and put its path in the PATH environmental variable.
 
-# Training:
+## Training:
 
 Run RobotPath training:
 
