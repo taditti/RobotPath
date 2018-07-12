@@ -2,6 +2,7 @@ import numpy as np
 from pyquaternion import Quaternion
 from copy import deepcopy, copy
 from math import pi, sin, cos, atan2
+import math3D
 
 def AngleAxis(angle,axis):
     x = axis[0]
@@ -38,8 +39,8 @@ def FK(theta):
 
     H_tool=Links_H
     xyz=H_tool[0:3,3]
-    Q=Quaternion(matrix=H_tool)
     R=H_tool[0:3,0:3]
+    Q = math3D.q_from_R(R)
 
     return [H_tool,xyz,R,Q]
 

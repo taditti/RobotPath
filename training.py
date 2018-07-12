@@ -3,7 +3,7 @@ import time
 from collections import deque
 import pickle
 
-from baselines.ddpg.ddpg import DDPG
+from ddpg import DDPG
 import baselines.common.tf_util as U
 
 from baselines import logger
@@ -12,10 +12,10 @@ import tensorflow as tf
 from mpi4py import MPI
 
 
-def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, param_noise, actor, critic,
+def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, critic,
     normalize_returns, normalize_observations, critic_l2_reg, actor_lr, critic_lr, action_noise,
     popart, gamma, clip_norm, nb_train_steps, nb_rollout_steps, nb_eval_steps, batch_size, memory,
-    tau=0.01, eval_env=None, param_noise_adaption_interval=50):
+    tau=0.01, eval_env=None, param_noise_adaption_interval=50, render=False, render_eval=False):
     rank = MPI.COMM_WORLD.Get_rank()
 
     assert (np.abs(env.action_space.low) == env.action_space.high).all()  # we assume symmetric actions.
@@ -66,21 +66,28 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
         epoch_qs = []
         epoch_episodes = 0
         for epoch in range(nb_epochs):
+            
             for cycle in range(nb_epoch_cycles):
+                
                 # Perform rollouts.
                 for t_rollout in range(nb_rollout_steps):
+                    #print('epoch:', epoch)
+                    #print('cycle:', cycle)
+                    #print('rollout:', t_rollout)
                     # Predict next action.
                     action, q = agent.pi(obs, apply_noise=True, compute_Q=True)
                     assert action.shape == env.action_space.shape
 
                     # Execute next action.
-                    if rank == 0 and render:
-                        env.render()
+                    #if rank == 0 and render:
+                        #env.render()
                     assert max_action.shape == action.shape
                     new_obs, r, done, info = env.step(max_action * action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
                     t += 1
-                    if rank == 0 and render:
-                        env.render()
+                    if epoch >100:
+                        time.sleep(0.05)
+                    #if rank == 0 and render:
+                    #    env.render()
                     episode_reward += r
                     episode_step += 1
 
@@ -108,6 +115,7 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                 epoch_critic_losses = []
                 epoch_adaptive_distances = []
                 for t_train in range(nb_train_steps):
+                    #print('t_train:',t_train)
                     # Adapt param noise, if necessary.
                     if memory.nb_entries >= batch_size and t_train % param_noise_adaption_interval == 0:
                         distance = agent.adapt_param_noise()
@@ -121,6 +129,7 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
                 # Evaluate.
                 eval_episode_rewards = []
                 eval_qs = []
+                eval_env = None
                 if eval_env is not None:
                     eval_episode_reward = 0.
                     for t_rollout in range(nb_eval_steps):
@@ -143,6 +152,7 @@ def train(env, nb_epochs, nb_epoch_cycles, render_eval, reward_scale, render, pa
             duration = time.time() - start_time
             stats = agent.get_stats()
             combined_stats = stats.copy()
+            combined_stats['epoch'] = epoch
             combined_stats['rollout/return'] = np.mean(epoch_episode_rewards)
             combined_stats['rollout/return_history'] = np.mean(episode_rewards_history)
             combined_stats['rollout/episode_steps'] = np.mean(epoch_episode_steps)

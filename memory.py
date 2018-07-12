@@ -6,6 +6,8 @@ class RingBuffer(object):
         self.maxlen = maxlen
         self.start = 0
         self.length = 0
+        print("*************************************")
+        print((maxlen,) , shape)
         self.data = np.zeros((maxlen,) + shape).astype(dtype)
 
     def __len__(self):
@@ -42,7 +44,10 @@ def array_min2d(x):
 class Memory(object):
     def __init__(self, limit, action_shape, observation_shape):
         self.limit = limit
-
+        
+        print("*************************************")
+        print(limit, observation_shape)
+        
         self.observations0 = RingBuffer(limit, shape=observation_shape)
         self.actions = RingBuffer(limit, shape=action_shape)
         self.rewards = RingBuffer(limit, shape=(1,))
