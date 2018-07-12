@@ -2,6 +2,7 @@
 
 ## Using OpenAI DDPG for online obstacle avoidance.
 
+<img src="https://github.com/kavehkamali/RobotPath/blob/master/demo.gif" width="200">
 ![](https://github.com/kavehkamali/RobotPath/blob/master/demo.gif = 250x250)
 
 
