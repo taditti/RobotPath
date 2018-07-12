@@ -3,7 +3,7 @@
 ## Using OpenAI DDPG for online obstacle avoidance.
 
 <p align="center">
-    <img src="https://github.com/kavehkamali/RobotPath/blob/master/demo.gif" width="400">
+    <img src="https://github.com/kavehkamali/RobotPath/blob/master/demo.gif" width="450">
 </p>
 
 ## Installation:
@@ -25,7 +25,7 @@ For installing baselines you need to run:
 pip install -e .
 ```
 
-Note 1: OpenAI baselines will install gym which needs MuJuco license. We do not need MuJuco so just remove the words: "mujoco,robotics" from "setup.py" before running the above command.
+Note 1: OpenAI baselines will install gym which needs MuJoco license. We do not need MuJoco so just remove the words: "mujoco,robotics" from "setup.py" before running the above command.
 
 Note 2: Atary module of gym cannot be installed on windows. So remove the word: "Atari" from "setup.py" before running it.
 
