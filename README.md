@@ -2,6 +2,7 @@
 
 ![Alt Text](https://github.com/kavehkamali/RobotPath/blob/master/demo.gif)
 
+Using OpenAI DDPG for online obstacle avoidance.
 
 1- Install pybullet:
 
@@ -20,11 +21,11 @@ For installing baselines you need to run:
 pip install -e .
 ```
 
-Note 1: OpenAI baselines will install gym which need MuJuco licence. We do not need MuJuco so just remove the words: "mujoco,robotics" from "setup.py" before running the above command.
+Note 1: OpenAI baselines will install gym which needs MuJuco license. We do not need MuJuco so just remove the words: "mujoco,robotics" from "setup.py" before running the above command.
 
-Note 2: Atary module of gym cannot be installed on windows. So remove the word: "atari" from "setup.py" befor running it.
+Note 2: Atary module of gym cannot be installed on windows. So remove the word: "Atari" from "setup.py" before running it.
 
-3- Install MPI on your system and put its path in the PATH environmetal variable.
+3- Install MPI on your system and put its path in the PATH environmental variable.
 
 4- Run RobotPath training:
 
