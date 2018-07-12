@@ -41,10 +41,10 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
     episode_rewards_history = deque(maxlen=100)
     with U.single_threaded_session() as sess:
         
-        #saver.restore(sess, "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_33.ckpt")
+        saver.restore(sess, "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_5.ckpt")
         # Prepare everything.
-        agent.initialize(sess)
-        #agent.continue_sess(sess)
+        #agent.initialize(sess)
+        agent.continue_sess(sess)
         sess.graph.finalize()
 
         agent.reset()

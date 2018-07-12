@@ -29,7 +29,13 @@ Note 1: OpenAI baselines will install gym which needs MuJoco license. We do not 
 
 Note 2: Atary module of gym cannot be installed on windows. So remove the word: "Atari" from "setup.py" before running it.
 
-3- Install MPI on your system and put its path in the PATH environmental variable.
+3- install pyquaternion:
+
+```
+pip install pyquaternion
+```
+
+4- Install MPI on your system and put its path in the PATH environmental variable.
 
 ## Training:
 
