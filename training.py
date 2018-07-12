@@ -84,7 +84,7 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
                     assert max_action.shape == action.shape
                     new_obs, r, done, info = env.step(max_action * action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
                     t += 1
-                    if epoch >100:
+                    if epoch > 20:
                         time.sleep(0.05)
                     #if rank == 0 and render:
                     #    env.render()
@@ -186,7 +186,12 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
             # Total statistics.
             combined_stats['total/epochs'] = epoch + 1
             combined_stats['total/steps'] = t
-
+            
+            
+            save_path = saver.save(sess, "C:/Users/AN95540/Desktop/ICRA2019/Codes/RobotPath-ddpg/model/epoch_"+str(epoch)+".ckpt")
+            print(save_path)
+            
+            
             for key in sorted(combined_stats.keys()):
                 logger.record_tabular(key, combined_stats[key])
             logger.dump_tabular()
