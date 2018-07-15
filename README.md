@@ -2,7 +2,7 @@
 
 ## Using OpenAI "Continuous Deep Reinforcement Learning" for real-time trajectory generation and obstacle avoidance.
 
-The code is heavily borrowed from OpenAI DDPG ([I'm an inline-style link](https://www.google.com))
+The code is heavily borrowed from OpenAI DDPG ([link](https://github.com/openai/baselines/tree/master/baselines/ddpg))
 
 
 <p align="center">
