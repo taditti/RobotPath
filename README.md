@@ -1,6 +1,9 @@
 # RobotPath
 
-## Using OpenAI DDPG for online obstacle avoidance.
+## Using OpenAI "Continuous Deep Reinforcement Learning" for real-time trajectory generation and obstacle avoidance.
+
+The code is heavily borrowed from OpenAI DDPG ([I'm an inline-style link](https://www.google.com))
+
 
 <p align="center">
     <img src="https://github.com/kavehkamali/RobotPath/blob/master/demo.gif" width="450">
