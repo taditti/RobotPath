@@ -26,12 +26,12 @@ def run(env_id, render, render_eval, seed, noise_type, layer_norm, evaluation, *
 
     # Create envs.
     env = RobotPath.env(render)
-    env = bench.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)))
+    env = bench.Monitor(env, logger.get_dir() and os.path.join(logger.get_dir(), str(rank)),allow_early_resets=True)
 
     if evaluation and rank==0:
         eval_env = RobotPath.env(render_eval)
-        eval_env = bench.Monitor(eval_env, os.path.join(logger.get_dir(), 'gym_eval'))
-        env = bench.Monitor(env, None)
+        eval_env = bench.Monitor(eval_env, os.path.join(logger.get_dir(), 'gym_eval'),allow_early_resets=True)
+        env = bench.Monitor(env, None,allow_early_resets=True)
     else:
         eval_env = None
 
@@ -58,7 +58,7 @@ def run(env_id, render, render_eval, seed, noise_type, layer_norm, evaluation, *
     # Configure components.
     #print("----------------")
     #print(env.observation_space)
-    env = gym.wrappers.FlattenDictWrapper(env, ['start_point','desired_goal', 'achieved_goal','observation'])
+    env = gym.wrappers.FlattenDictWrapper(env, ['desired_goal', 'achieved_goal','observation'])
     #print(env.observation_space)
  #   print(env.observation_space['start_point'].shape)
     #print("----------------")
@@ -93,7 +93,7 @@ def parse_args():
     parser.add_argument('--env-id', type=str, default='HalfCheetah-v2')
     boolean_flag(parser, 'render-eval', default=False)
     boolean_flag(parser, 'layer-norm', default=True)
-    boolean_flag(parser, 'render', default=False)
+    boolean_flag(parser, 'render', default=True)
     boolean_flag(parser, 'normalize-returns', default=False)
     boolean_flag(parser, 'normalize-observations', default=True)
     parser.add_argument('--seed', help='RNG seed', type=int, default=0)

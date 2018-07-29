@@ -34,9 +34,10 @@ class env(gym.GoalEnv):
         self.point2b = self.sim.addUserDebugLine(np.array([0, 0, 0.8]),np.array([0, 0, 0.8]),[1,0,0])
         self.line = self.sim.addUserDebugLine(np.array([0, 0, 0.8]),np.array([0, 0, 0.8]),[0,0,1])
         
-        #os.system('cls')
+        os.system('cls')
         self.J_max =np.array([ 90,  80,  55,  90,  90,  150])
         self.J_min =np.array([-90, -30, -50, -90, -90, -150])
+
         self.state_buffer_size = 1
 
         self.metadata = {
@@ -49,7 +50,7 @@ class env(gym.GoalEnv):
         obs = self._get_obs()
         self.action_space = spaces.Box(-max_Joints_offset, max_Joints_offset, shape=(n_actions,), dtype='float32')
         self.observation_space = spaces.Dict(dict(
-            start_point=spaces.Box(-np.inf, np.inf, shape=obs['start_point'].shape, dtype='float32'),
+            #start_point=spaces.Box(-np.inf, np.inf, shape=obs['start_point'].shape, dtype='float32'),
             desired_goal=spaces.Box(-np.inf, np.inf, shape=obs['desired_goal'].shape, dtype='float32'),
             achieved_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
             observation=spaces.Box(-np.inf, np.inf, shape=obs['observation'].shape, dtype='float32')
@@ -65,21 +66,16 @@ class env(gym.GoalEnv):
         self._sim_step(action)
         obs = self._get_obs()
         
-        info = {
-            'is_success': self._is_success(),
-        }
+        #info = {
+        #    'is_success': self._is_success(),
+        #}
         reward = self._compute_reward()
-        #print('********************************')
-        #print('********************************')
-        #print('Reward:', reward)
-        #print('********************************')
-        #print('********************************')
         
-        return obs, reward, self.done, info
+        return obs, reward, self.done, self.info
     
     def reset(self):
-        #print("***************************************")
         self.done = False
+        self.info ={'near_collision':False, 'near_limits':False} 
         self.time_step = 0
 
         self._sample_goal_start()
@@ -100,21 +96,24 @@ class env(gym.GoalEnv):
         while True:
             J = np.random.rand(6)*(self.J_max-self.J_min)+self.J_min
             #J=np.array([-50.0,0.0,20.0,0.0,20.0,0.0])
-            collision_check, xyz, q = self._check_collision(J)
-            if collision_check==0:
-                self.J_start = J
-                self.xyz_start = xyz
-                self.xyz_achieved = xyz
-                self.q_achieved = q
-                self.J_achieved = J
+            collision_distance, joint_distance, xyz, q = self._check_collision(J)
+            #if collision_check==0:
+            if collision_distance > 5 and joint_distance > 2:
+                self.J_start = J.copy()
+                self.xyz_start = xyz.copy()
+                self.xyz_achieved = xyz.copy()
+                self.q_achieved = q.copy()
+                self.J_achieved = J.copy()
                 break
         while True:
             J = np.random.rand(6)*(self.J_max-self.J_min)+self.J_min
             #J=np.array([ 50.0,0.0,20.0,0.0,20.0,0.0])
-            collision_check, xyz, q = self._check_collision(J)
-            if collision_check==0 and np.linalg.norm(xyz - self.xyz_start)>100:
-                self.J_goal = J
-                self.xyz_goal = xyz
+            #collision_check, xyz, q = self._check_collision(J)
+            collision_distance, joint_distance, xyz, q = self._check_collision(J)
+            #if collision_check==0 and np.linalg.norm(xyz - self.xyz_start)>100:
+            if collision_distance > 5 and joint_distance > 2 :
+                self.J_goal = J.copy()
+                self.xyz_goal = xyz.copy()
                 break
                 
         self.sim.removeUserDebugItem(self.point1a)
@@ -134,7 +133,7 @@ class env(gym.GoalEnv):
         #print('action:', action)
         self.J_achieved += action
         #H_tool, self.xyz_achieved, R, Q = ABB120.FK(Joints)
-        self.collision_check, self.xyz_achieved, self.q_achieved = self._check_collision(self.J_achieved)
+        self.collision_distance, self.joint_distance, self.xyz_achieved, self.q_achieved = self._check_collision(self.J_achieved)
         self.time_step += self.dt
 
         #for _ in range(3*6):
@@ -147,24 +146,27 @@ class env(gym.GoalEnv):
         
     def _compute_reward(self):
         reward = 0
-        if self.collision_check == 1:
-            #print("** Collision! **")
-            reward = -1
-            self.done = True
-        else:
-            remained = np.linalg.norm(self.xyz_goal - self.xyz_achieved)
-            passed = self.goal_dist - remained
-            reward = passed/self.goal_dist
-            speed = passed/self.time_step
-            reward += speed
-            #print(passed,goal_dist)
-            #print("xyz_start:",self.xyz_start, "self.xyz_goal:",self.xyz_goal)
-            #print("Proj:",proj,"self.xyz_achieved:",self.xyz_achieved)
-            #print("reward:",reward, "speed:",speed)
-            if remained < 10:
-                reward += 10
+        self.done = False
+        self.info ={'near_collision':False, 'near_limits':False} 
+        if self.collision_distance < 50:
+            self.info['near_collision']=True
+            reward -= (50-self.collision_distance)*100
+            if self.collision_distance < 5:
                 self.done = True
-                print("************** Goal achieved! ****************")
+                
+        if self.joint_distance < 20:
+            self.info['near_limits']=True
+            reward -= (20-self.joint_distance)*100
+            if self.joint_distance < 5:
+                self.done = True
+                
+        remained = np.linalg.norm(self.xyz_goal - self.xyz_achieved)
+        reward -= remained
+
+        if remained < 10:
+            reward += 100000
+            self.done = True
+            print("************** Goal achieved! ****************")
         return reward
         
     def _is_success(self):
@@ -215,20 +217,30 @@ class env(gym.GoalEnv):
         #                [3, 5],
         #                [-10, 2], [-10, 3], [-10, 4], [-10, 5]]
 
-        for k in range(0,len(dist)):
-            if dist[k] < 0.001:
-                collision_check = 1
-                dist[k] = 0.001
+        #for k in range(0,len(dist)):
+        #    if dist[k] < 0.001:
+        #        collision_check = 1
+        #        dist[k] = 0.001
 
         H_tool,xyz,R,Q=ABB120.FK(Joints)
-        if xyz[2] < 50:
-            collision_check = 1
+        #if xyz[2] < 50:
+        #    collision_check = 1
 
+        #for i in range(6):
+        #    if Joints[i]>self.J_max[i] or Joints[i]<self.J_min[i]:
+        #        collision_check = 1
+        joint_dist = []
         for i in range(6):
-            if Joints[i]>self.J_max[i] or Joints[i]<self.J_min[i]:
-                collision_check = 1
+            joint_dist.append(abs(Joints[i]-self.J_max[i]))
+            joint_dist.append(abs(Joints[i]-self.J_min[i]))
 
-        return collision_check, xyz, Q
+        collision_distance = min(dist)
+        joint_distance = min(joint_dist)
+        
+        #collision_distance = 1000
+        #joint_distance = 1000
+
+        return collision_distance*1000, joint_distance, xyz, Q
         
     
     #def _compute_reward(self, achieved_goal, goal, info):
@@ -251,5 +263,5 @@ class env(gym.GoalEnv):
             'observation': obs.copy(),
             'achieved_goal': self.J_achieved.copy(),
             'desired_goal': self.J_goal.copy(),
-            'start_point': self.J_start.copy(),
+            #'start_point': self.J_start.copy(),
         }

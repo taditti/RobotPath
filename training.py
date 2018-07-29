@@ -49,6 +49,7 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
 
         agent.reset()
         obs = env.reset()
+        info ={'near_collision':False, 'near_limits':False} 
         if eval_env is not None:
             eval_obs = eval_env.reset()
         done = False
@@ -74,9 +75,11 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
                 
                 # Perform rollouts.
                 for t_rollout in range(nb_rollout_steps):
-                    #print('epoch:', epoch)
-                    #print('cycle:', cycle)
-                    #print('rollout:', t_rollout)
+                    print('epoch:', epoch)
+                    print('cycle:', cycle)
+                    print('rollout:', t_rollout)
+                    if epoch>5:
+                        time.sleep(0.1)
                     # Predict next action.
                     action, q = agent.pi(obs, apply_noise=True, compute_Q=True)
                     assert action.shape == env.action_space.shape
@@ -85,11 +88,20 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
                     #if rank == 0 and render:
                         #env.render()
                     assert max_action.shape == action.shape
-                    new_obs, r, done, info = env.step(max_action * action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
+                    #new_obs, r, done, info = env.step(max_action * action)  # scale for execution in env (as far as DDPG is concerned, every action is in [-1, 1])
+                    #print(obs)
+                    if info['near_collision'] or info['near_limits'] or epoch>5:
+                        new_obs, r, done, info = env.step(max_action * action)
+                    else:
+                        action = (obs[0:6]-obs[6:12])*0.1+np.random.rand(6)*0.1
+                        new_obs, r, done, info = env.step(action)
                     t += 1
+                    if episode_step>1000:
+                        done = True
                     #if rank == 0 and render:
                     #    env.render()
                     episode_reward += r
+                    print('episode_reward:',episode_reward)
                     episode_step += 1
 
                     # Book-keeping.
@@ -100,6 +112,7 @@ def train(env, nb_epochs, nb_epoch_cycles, reward_scale, param_noise, actor, cri
 
                     if done:
                         # Episode done.
+                        print('**********END OF EPISODE**********')
                         epoch_episode_rewards.append(episode_reward)
                         episode_rewards_history.append(episode_reward)
                         epoch_episode_steps.append(episode_step)
